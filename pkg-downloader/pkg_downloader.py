@@ -6,15 +6,20 @@ import urlparse
 import json
 
 
+global asset_size
+
 asset_size = -1
 
-def showprogress(block_count, block_size, file_size):
+def show_progress(block_count, block_size, file_size):
+	global asset_size
 	size = asset_size if file_size == -1 else file_size
 	if size >= 0:
-		progress_string = str(min(block_count * block_size * 100 / (size * 8), 100)) + "%"
+		progress_string = str(min(
+			block_count * block_size * 100 / size, 100
+			)) + "%"
 	else:
 		progress_string = str(block_count * block_size) + "bytes"
-	print "Downloading {}...".format(progress_string)
+	print "Downloading {}...".format( progress_string)
 
 def find_github_api_url(url):
 		repo_url = urlparse.urlparse(url)
@@ -31,6 +36,7 @@ if __name__ == '__main__':
 		'github repository in which case the downloader will attempt to retrieve the specified file from the latest github release.')
 	parser.add_argument('--path', help='path where the archive is going to be saved.')
 	parser.add_argument('--file', help='the filename of the saved archive',)
+	parser.add_argument('--extract', help='extract the downloaded zip file into the download directory')
 
 
 	args = parser.parse_args()
@@ -54,7 +60,11 @@ if __name__ == '__main__':
 			for asset in json_data["assets"]:
 				if asset["name"] == file_name:
 					url = asset["browser_download_url"]
-					asset_size = asset['size']
+					if "size" in asset:
+						asset_size = asset['size']
+						print "Found size: {}".format( asset_size )
+					else:
+						print "size is not present in json data: '{}'".format(json_data)
 					found_asset = True
 					break;
 		except:
@@ -72,9 +82,8 @@ if __name__ == '__main__':
 		raise Exception("File '{}' exists and could not be removed!".format(file_name))
 
 	print "Downloading {} to {}...".format(url, dl_path)
-	safe_url = urllib.quote(args.url)
 	try:
-		urllib.urlretrieve(args.url, dl_path, showprogress)
+		urllib.urlretrieve(url, dl_path, show_progress)
 	except urllib.ContentTooShortError:
 		raise Exception("Download failed!")
 	print "done."
