@@ -11,7 +11,7 @@ usage: pkg_downloader.py [-h] [--latest-release-file LATEST_RELEASE_FILE]
 Archive download utility
 
 positional arguments:
-  url                   download url of the package
+  url                   download/repository url of the package
 
 optional arguments:
   -h, --help            show this help message and exit

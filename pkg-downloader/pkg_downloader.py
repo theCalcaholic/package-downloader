@@ -31,7 +31,7 @@ def find_github_api_url(url):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Archive download utility')
-	parser.add_argument('url', help='download url of the package')
+	parser.add_argument('url', help='download/repository url of the package')
 	parser.add_argument('--latest-release-file', help='if specified, the url is expected to point to a ' + \
 		'github repository in which case the downloader will attempt to retrieve the specified file from the latest github release.')
 	parser.add_argument('--path', help='path where the archive is going to be saved.')
