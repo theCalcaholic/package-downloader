@@ -4,15 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>dcd8abdd-7443-45bc-bf6f-525480820c13</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>severblend_pkg_downloader.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>pkg_downloader.py</StartupFile>
+    <SearchPath>C:\Program Files\IronPython 2.7\Lib</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
-    <InterpreterId>IronPython|2.7-32</InterpreterId>
+    <InterpreterId>IronPython|2.7-64</InterpreterId>
     <LaunchProvider>IronPython (.NET) launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
-    <Name>severblend_pkg-downloader</Name>
-    <RootNamespace>severblend_pkg-downloader</RootNamespace>
+    <Name>pkg-downloader</Name>
+    <RootNamespace>pkg-downloader</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,10 +22,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="severblend_pkg_downloader.py" />
+    <None Include="pkg_downloader.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="IronPython|2.7-32" />
+    <InterpreterReference Include="IronPython|2.7-64" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
