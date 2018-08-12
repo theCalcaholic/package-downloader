@@ -36,7 +36,8 @@ if __name__ == '__main__':
 		'github repository in which case the downloader will attempt to retrieve the specified file from the latest github release.')
 	parser.add_argument('--path', help='path where the archive is going to be saved.')
 	parser.add_argument('--file', help='the filename of the saved archive',)
-	parser.add_argument('--extract', help='extract the downloaded zip file into the download directory')
+	parser.add_argument('--extract', help='extract the downloaded zip file into the download directory', action='store_true')
+	parser.set_defaults(extract=True)
 
 
 	args = parser.parse_args()
@@ -86,6 +87,13 @@ if __name__ == '__main__':
 		urllib.urlretrieve(url, dl_path, show_progress)
 	except urllib.ContentTooShortError:
 		raise Exception("Download failed!")
+
+	if args.extract is not None:
+		zip_ref = zipfile.ZipFile(dl_path, 'r')
+		zip_ref.extractall(path)
+		zip_ref.close()
+		os.remove(dl_path)
+
 	print "done."
 
 	

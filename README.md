@@ -22,6 +22,6 @@ optional arguments:
                         release.
   --path PATH           path where the archive is going to be saved.
   --file FILE           the filename of the saved archive
-  --extract EXTRACT     extract the downloaded zip file into the download
+  --extract             extract the downloaded zip file into the download
                         directory
 ```
