@@ -3,7 +3,6 @@ import argparse
 import os
 import urllib
 import urlparse
-import requests
 import json
 
 
