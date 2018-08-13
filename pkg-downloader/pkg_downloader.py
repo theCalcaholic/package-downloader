@@ -3,6 +3,7 @@ import argparse
 import os
 import urllib
 import urlparse
+import requests
 import json
 
 
@@ -29,6 +30,29 @@ def find_github_api_url(url):
 		netpath = "/repos" + netpath + "/releases/latest"
 		return urlparse.ParseResult(repo_url.scheme, netloc, netpath, *repo_url[3:]).geturl()
 
+def get_latest_release_file(url, asset_name):
+	size = -1
+	api_url = find_github_api_url(url)
+
+	response = urllib.urlopen(api_url)
+	try:
+		json_data = json.loads(response.read())
+		for asset in json_data["assets"]:
+			if asset["name"] == asset_name:
+				asset_url = asset["browser_download_url"]
+				if "size" in asset:
+					size = asset['size']
+					print "Found size: {}".format( asset_size )
+				else:
+					print "size is not present in json data: '{}'".format(json_data)
+				return asset_url, size
+				break;
+	except:
+		raise Exception("An error occured, while parsing the github API!")
+
+	raise Exception("Asset {} could not be found in latest release of {}!".format(file_name, args.url))
+
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Archive download utility')
 	parser.add_argument('url', help='download/repository url of the package')
@@ -37,7 +61,7 @@ if __name__ == '__main__':
 	parser.add_argument('--path', help='path where the archive is going to be saved.')
 	parser.add_argument('--file', help='the filename of the saved archive',)
 	parser.add_argument('--extract', help='extract the downloaded zip file into the download directory', action='store_true')
-	parser.set_defaults(extract=True)
+	parser.set_defaults(extract=False)
 
 
 	args = parser.parse_args()
@@ -50,29 +74,9 @@ if __name__ == '__main__':
 	url = args.url
 
 	if args.latest_release_file is not None:
+		print "Parsing github API..."
 		file_name = args.latest_release_file
-
-		api_url = find_github_api_url(args.url)
-
-		response = urllib.urlopen(api_url)
-		found_asset = False
-		try:
-			json_data = json.loads(response.read())
-			for asset in json_data["assets"]:
-				if asset["name"] == file_name:
-					url = asset["browser_download_url"]
-					if "size" in asset:
-						asset_size = asset['size']
-						print "Found size: {}".format( asset_size )
-					else:
-						print "size is not present in json data: '{}'".format(json_data)
-					found_asset = True
-					break;
-		except:
-			raise Exception("An error occured, while parsing the github API!")
-
-		if not found_asset:
-			raise Exception("Asset {} could not be found in latest release of {}!".format(file_name, args.url))
+		url, asset_size = get_latest_release_file(args.url, file_name)
 
 	dl_path = os.path.join(path, file_name)
 
@@ -85,10 +89,20 @@ if __name__ == '__main__':
 	print "Downloading {} to {}...".format(url, dl_path)
 	try:
 		urllib.urlretrieve(url, dl_path, show_progress)
+		#r = requests.get(url, stream=True)
+		#if r.status_code == 200:
+		#	with open(dl_path, 'wb') as f:
+		#		r.raw_decode_content = True
+		#		f.write(r.raw)
 	except urllib.ContentTooShortError:
 		raise Exception("Download failed!")
+	except IOError as e:
+		raise Exception("An error occured while downloading!\n\n{}".format(e.message))
 
-	if args.extract is not None:
+	print "Download complete."
+
+	if args.extract:
+		print "Extracting..."
 		zip_ref = zipfile.ZipFile(dl_path, 'r')
 		zip_ref.extractall(path)
 		zip_ref.close()
