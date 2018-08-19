@@ -96,7 +96,7 @@ if __name__ == '__main__':
 	except urllib.ContentTooShortError:
 		raise Exception("Download failed!")
 	except IOError as e:
-		raise Exception("An error occured while downloading!\n\n{}".format(e.message))
+		raise Exception("An error occured while downloading!\n\n{}".format(e))
 
 	print "Download complete."
 
