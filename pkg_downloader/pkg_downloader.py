@@ -1,13 +1,15 @@
 import zipfile
-import argparse
 import os
-import urllib
+import urllib.parse
+import urllib.request
+import urllib.error
 import json
 
 
 global asset_size
 
 asset_size = -1
+
 
 def show_progress(block_count, block_size, file_size):
 	global asset_size
@@ -20,6 +22,7 @@ def show_progress(block_count, block_size, file_size):
 		progress_string = str(block_count * block_size) + "bytes"
 	print ("Downloading {}...".format( progress_string) )
 
+
 def find_github_api_url(url):
 		repo_url = urllib.parse.urlparse(url)
 		netloc = repo_url.netloc or repo_url.path
@@ -27,6 +30,7 @@ def find_github_api_url(url):
 		netpath = repo_url.path
 		netpath = "/repos" + netpath + "/releases/latest"
 		return urllib.parse.ParseResult(repo_url.scheme, netloc, netpath, *repo_url[3:]).geturl()
+
 
 def get_latest_release_file(url, asset_name):
 	size = -1
@@ -44,26 +48,26 @@ def get_latest_release_file(url, asset_name):
 				else:
 					print("size is not present in json data: '{}'".format(json_data))
 				return asset_url, size
-	except:
-		raise Exception("An error occured, while parsing the github API!")
+	except Exception as e:
+		raise Exception("An error occured, while parsing the github API:\n", e)
 
-	raise Exception("Asset {} could not be found in latest release of {}!".format(file_name, args.url))
+	raise Exception("Asset {} could not be found in latest release of {}!".format(asset_name, url))
 
 
-def download_release(latest_release_file, extract=False):
+def download_release(url, target_path, output_file=None, latest_release_file=None, extract=False):
 	
 	if latest_release_file is not None:
 		print("Parsing github API...")
-		file_name = latest_release_file
-		url, asset_size = get_latest_release_file(args.url, file_name)
+		file_name = output_file if output_file else latest_release_file
+		url, asset_size = get_latest_release_file(url, latest_release_file)
 
-	dl_path = os.path.join(path, file_name)
+	dl_path = os.path.join(target_path, output_file)
 
 	if os.path.isfile(dl_path):
 		os.remove(dl_path)
 
 	if os.path.exists(dl_path):
-		raise Exception("File '{}' exists and could not be removed!".format(file_name))
+		raise Exception("File '{}' exists and could not be removed!".format(output_file))
 
 	print("Downloading {} to {}...".format(url, dl_path))
 	try:
@@ -83,33 +87,6 @@ def download_release(latest_release_file, extract=False):
 	if extract:
 		print("Extracting...")
 		zip_ref = zipfile.ZipFile(dl_path, 'r')
-		zip_ref.extractall(path)
+		zip_ref.extractall(target_path)
 		zip_ref.close()
 		os.remove(dl_path)
-
-
-if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description='Archive download utility')
-	parser.add_argument('url', help='download/repository url of the package')
-	parser.add_argument('--latest-release-file', help='if specified, the url is expected to point to a ' + \
-		'github repository in which case the downloader will attempt to retrieve the specified file from the latest github release.')
-	parser.add_argument('--path', help='path where the archive is going to be saved.')
-	parser.add_argument('--file', help='the filename of the saved archive',)
-	parser.add_argument('--extract', help='extract the downloaded zip file into the download directory', action='store_true')
-	parser.set_defaults(extract=False)
-
-
-	args = parser.parse_args()
-
-	path = args.path or os.getcwd()
-	if not os.path.exists(path):
-		os.makedirs(path)
-
-	file_name = args.file or args.url.split('/')[-1]
-	url = args.url
-
-
-	download_release(args.latest_release_file, args.extract)
-	print("done.")
-
-	
